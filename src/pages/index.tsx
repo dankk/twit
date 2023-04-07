@@ -18,7 +18,7 @@ const CreatePostWizard = () => {
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
-      ctx.posts.getAll.invalidate();
+      ctx.posts.getAll.invalidate().catch((error) => console.error(error));
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content; //zoderror is null on ratelimit?
