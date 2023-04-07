@@ -8,6 +8,7 @@ import { prisma } from "~/server/db";
 import SuperJSON from "superjson";
 import { PageLayout } from "~/components/layout";
 import { LoadingPage } from "~/components/loading";
+import Image from "next/image";
 
 const ProfileFeed = (props: { userId: string }) => {
   const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
@@ -41,9 +42,9 @@ const ProfilePage: NextPage<{ username: string }> = ({ username }) => {
       </Head>
       <PageLayout>
         <div className="relative h-36 bg-slate-600">
-          <img
-            src={data.profileImageUrl}
-            alt={`${data.username}'s profile pic`}
+          <Image
+            src={data.profileImageUrl ?? ""}
+            alt={`${data.username ?? ""}'s profile pic`}
             width={128}
             height={128}
             className={
