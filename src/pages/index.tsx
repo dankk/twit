@@ -3,10 +3,11 @@ import { type NextPage } from "next";
 import { api } from "~/utils/api";
 import Image from "next/image";
 import { LoadingPage, LoadingSpinner } from "~/components/loading";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { PageLayout } from "~/components/layout";
 import { PostView } from "~/components/postview";
+import { useScrollPosition } from "~/hooks/useScrollPosition";
 
 const CreatePostWizard = () => {
   const { user } = useUser();
@@ -70,15 +71,39 @@ const CreatePostWizard = () => {
 };
 
 const Feed = () => {
-  const { data, isLoading: postsLoading } = api.posts.getAll.useQuery();
+  const scrollPosition = useScrollPosition("main");
+  console.log(98, scrollPosition);
+
+  const {
+    data,
+    hasNextPage,
+    fetchNextPage,
+    isLoading: postsLoading,
+    isFetching,
+  } = api.posts.getAll.useInfiniteQuery(
+    {
+      limit: 10,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor,
+    }
+  );
+
+  useEffect(() => {
+    if (scrollPosition > 90 && hasNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  }, [scrollPosition, hasNextPage, isFetching, fetchNextPage]);
 
   if (postsLoading) return <LoadingPage />;
 
   if (!data) return <div>Something went wrong</div>;
 
+  const posts = data.pages.flatMap((page) => page.posts);
+
   return (
     <div className="flex flex-col">
-      {data.map((fullPost) => (
+      {posts.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
     </div>
@@ -88,7 +113,7 @@ const Feed = () => {
 const Home: NextPage = () => {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
 
-  api.posts.getAll.useQuery();
+  //api.posts.getAll.useQuery();
 
   if (!userLoaded) return <div />;
 
