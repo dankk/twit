@@ -25,7 +25,7 @@ const ProfileFeed = (props: { userId: string }) => {
 
   useEffect(() => {
     if (scrollPosition > 90 && hasNextPage && !isFetching) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   }, [scrollPosition, hasNextPage, isFetching, fetchNextPage]);
 
