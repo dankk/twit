@@ -3,13 +3,8 @@ name: CI
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
-    branches:
-      - master
-
-env:
-  DATABASE_URL: "https://blah.com"
 
 jobs:
   build:
