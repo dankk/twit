@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
 
 env:
   DATABASE_URL: "https://blah.com"
@@ -12,18 +12,27 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
-
       - name: Install Dependencies
         run: |
           npm install
-
       - name: TypeScript Checking
         run: |
           npm run type-check
-
       - name: Linting
         run: |
           npm run lint
+
+  deploy:
+    if: ${{ github.event_name == 'push' }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v20
+        with:
+          token: ${{ secrets.VERCEL_TOKEN }}
+          prod: true

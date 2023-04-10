@@ -90,7 +90,7 @@ const Feed = () => {
 
   useEffect(() => {
     if (scrollPosition > 90 && hasNextPage && !isFetching) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   }, [scrollPosition, hasNextPage, isFetching, fetchNextPage]);
 
