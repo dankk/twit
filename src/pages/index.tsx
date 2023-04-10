@@ -19,7 +19,7 @@ const CreatePostWizard = () => {
   const { mutate, isLoading: isPosting } = api.posts.create.useMutation({
     onSuccess: () => {
       setInput("");
-      ctx.posts.getAll.invalidate().catch((error) => console.error(error));
+      ctx.posts.getPosts.invalidate().catch((error) => console.error(error));
     },
     onError: (e) => {
       const errorMessage = e.data?.zodError?.fieldErrors.content; //zoderror is null on ratelimit?
@@ -72,7 +72,6 @@ const CreatePostWizard = () => {
 
 const Feed = () => {
   const scrollPosition = useScrollPosition("main");
-  console.log(98, scrollPosition);
 
   const {
     data,
@@ -80,7 +79,7 @@ const Feed = () => {
     fetchNextPage,
     isLoading: postsLoading,
     isFetching,
-  } = api.posts.getAll.useInfiniteQuery(
+  } = api.posts.getPosts.useInfiniteQuery(
     {
       limit: 10,
     },
@@ -112,8 +111,6 @@ const Feed = () => {
 
 const Home: NextPage = () => {
   const { isLoaded: userLoaded, isSignedIn } = useUser();
-
-  //api.posts.getAll.useQuery();
 
   if (!userLoaded) return <div />;
 

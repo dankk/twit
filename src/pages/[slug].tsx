@@ -6,19 +6,37 @@ import { PageLayout } from "~/components/layout";
 import { LoadingPage } from "~/components/loading";
 import Image from "next/image";
 import { generateSSGHelper } from "~/server/helpers/ssgHelper";
+import { useEffect } from "react";
+import { useScrollPosition } from "~/hooks/useScrollPosition";
 
 const ProfileFeed = (props: { userId: string }) => {
-  const { data, isLoading } = api.posts.getPostsByUserId.useQuery({
-    userId: props.userId,
-  });
+  const scrollPosition = useScrollPosition("main");
+
+  const { data, hasNextPage, fetchNextPage, isLoading, isFetching } =
+    api.posts.getPosts.useInfiniteQuery(
+      {
+        userId: props.userId,
+        limit: 10,
+      },
+      {
+        getNextPageParam: (lastPage) => lastPage.nextCursor,
+      }
+    );
+
+  useEffect(() => {
+    if (scrollPosition > 90 && hasNextPage && !isFetching) {
+      fetchNextPage();
+    }
+  }, [scrollPosition, hasNextPage, isFetching, fetchNextPage]);
 
   if (isLoading) return <LoadingPage />;
-
-  if (!data || data.length === 0) return <>User has not posted...</>;
+  if (!data) return <>Something went wrong...</>;
+  const posts = data.pages.flatMap((page) => page.posts);
+  if (posts.length === 0) return <>User has not posted...</>;
 
   return (
     <div className="flex flex-col">
-      {data.map((fullPost) => (
+      {posts.map((fullPost) => (
         <PostView {...fullPost} key={fullPost.post.id} />
       ))}
     </div>

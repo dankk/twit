@@ -58,9 +58,36 @@ export const postsRouter = createTRPCRouter({
       return (await addUserDataToPosts([post]))[0];
     }),
 
-  getAll: publicProcedure
+  // getAll: publicProcedure
+  //   .input(
+  //     z.object({
+  //       cursor: z.string().nullish(),
+  //       limit: z.number().min(1).max(50),
+  //     })
+  //   )
+  //   .query(async ({ ctx, input }) => {
+  //     const limit = input.limit ?? 50;
+  //     const { cursor } = input;
+  //     const posts = await ctx.prisma.post.findMany({
+  //       take: limit + 1,
+  //       orderBy: [{ createdAt: "desc" }],
+  //       cursor: cursor ? { id: cursor } : undefined,
+  //     });
+
+  //     let nextCursor: typeof cursor | undefined = undefined;
+
+  //     if (posts.length > limit) {
+  //       const nextItem = posts.pop() as (typeof posts)[number];
+  //       nextCursor = nextItem.id;
+  //     }
+
+  //     return { posts: await addUserDataToPosts(posts), nextCursor };
+  //   }),
+
+  getPosts: publicProcedure
     .input(
       z.object({
+        userId: z.string().optional(),
         cursor: z.string().nullish(),
         limit: z.number().min(1).max(50),
       })
@@ -69,6 +96,7 @@ export const postsRouter = createTRPCRouter({
       const limit = input.limit ?? 50;
       const { cursor } = input;
       const posts = await ctx.prisma.post.findMany({
+        where: { authorId: input.userId },
         take: limit + 1,
         orderBy: [{ createdAt: "desc" }],
         cursor: cursor ? { id: cursor } : undefined,
@@ -83,18 +111,6 @@ export const postsRouter = createTRPCRouter({
 
       return { posts: await addUserDataToPosts(posts), nextCursor };
     }),
-
-  getPostsByUserId: publicProcedure
-    .input(z.object({ userId: z.string() }))
-    .query(async ({ ctx, input }) =>
-      ctx.prisma.post
-        .findMany({
-          where: { authorId: input.userId },
-          take: 100,
-          orderBy: [{ createdAt: "desc" }],
-        })
-        .then(addUserDataToPosts)
-    ),
 
   create: privateProcedure
     .input(z.object({ content: z.string().min(1).max(255) }))

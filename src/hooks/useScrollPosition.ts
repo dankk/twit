@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 
 export function useScrollPosition(elementId: string) {
   const [scrollPosition, setScrollPosition] = useState(0);
-  const element = document.getElementById(elementId);
+  const element =
+    typeof document === "object" ? document.getElementById(elementId) : null;
 
   function handleScroll() {
     if (!element) return;
