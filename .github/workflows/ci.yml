@@ -6,6 +6,9 @@ on:
       - main
   pull_request:
 
+env:
+  DATABASE_URL: "https://blah.com"
+
 jobs:
   build:
     runs-on: ubuntu-latest
